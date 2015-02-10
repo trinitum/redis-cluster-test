@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use RedisDB::Cluster;
+use Time::HiRes qw(usleep);
 
 my $redis = RedisDB::Cluster->new(
     startup_nodes => [
@@ -14,9 +15,11 @@ my $redis = RedisDB::Cluster->new(
     ]
 );
 
-for ( 1 .. 100 ) {
-    my $res = $redis->execute( "set", "foo$_", $_ );
-    die $res unless $res eq 'OK';
-    my $got = $redis->execute( "get", "foo$_" );
-    die "got: $got instead of $_" unless $got eq $_;
+while ( 1 ) {
+    my $i = int rand 16383;
+    my $res = $redis->execute( "set", "foo$i", $i );
+    warn $res unless "$res" eq 'OK';
+    my $got = $redis->execute( "get", "foo$i" );
+    warn "got: $got instead of $i" unless "$got" eq $i;
+    usleep 100_000;
 }
