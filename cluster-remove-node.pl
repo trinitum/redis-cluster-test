@@ -4,7 +4,27 @@ use strict;
 use warnings;
 
 use RedisDB::Cluster;
-$RedisDB::Cluster::DEBUG=1;
+use Getopt::Long;
 
-my $cluster = RedisDB::Cluster->new(startup_nodes => [{host => '127.0.0.1', port => '7000'}]);
-$cluster->remove_node({host => '127.0.0.1', port => 7002});
+GetOptions(
+    'host=s' => \my $host,
+    'port=i' => \my $port,
+    'debug'  => \$RedisDB::Cluster::DEBUG,
+);
+
+$host //= '127.0.0.1';
+
+my $cluster = RedisDB::Cluster->new(
+    startup_nodes => [
+        {
+            host => $host,
+            port => $port
+        }
+    ]
+);
+$cluster->remove_node(
+    {
+        host => $host,
+        port => $port
+    }
+);
